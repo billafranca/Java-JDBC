@@ -1,29 +1,30 @@
 package model;
-
 import controller.Icrud;
 import datamodel.Cliente;
-
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class AppDataBase implements Icrud<Cliente> {
 
     public String url = "jdbc:sqlite:config/banco.db";
 
     public AppDataBase() {
-        File configDir = new File("config");
-        if (!configDir.exists()) {
-            configDir.mkdirs();
-        }
-        try (Connection conn = DriverManager.getConnection(url);
-             Statement stmt = conn.createStatement()) {
-            String sql = "CREATE TABLE IF NOT EXISTS clientes (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "nome TEXT NOT NULL, " +
-                    "email TEXT NOT NULL)";
-            stmt.execute(sql);
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            try (Connection conn = DriverManager.getConnection(url);
+                 Statement stmt = conn.createStatement()) {
+                String sql = "CREATE TABLE IF NOT EXISTS clientes (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "nome TEXT NOT NULL, " +
+                        "email TEXT NOT NULL)";
+                stmt.execute(sql);
+            }
+        } catch (ClassNotFoundException e) {
+            System.err.println("Driver SQLite não encontrado: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Erro ao criar tabela: " + e.getMessage());
         }
@@ -36,8 +37,7 @@ public class AppDataBase implements Icrud<Cliente> {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, obj.getNome());
             pstmt.setString(2, obj.getEmail());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Erro ao inserir: " + e.getMessage());
             return false;

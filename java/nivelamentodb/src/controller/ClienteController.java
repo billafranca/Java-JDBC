@@ -7,16 +7,18 @@ import java.util.List;
 
 public class ClienteController {
 
-    private AppDataBase db = new AppDataBase();
+    private final AppDataBase db = new AppDataBase();
 
-    public boolean cadastrarCliente(String nome, String email) {
+    public boolean inserir(String nome, String email) {
+        if (nome == null || nome.isBlank() || email == null || email.isBlank()) return false;
         Cliente c = new Cliente();
-        c.setNome(nome);
-        c.setEmail(email);
+        c.setNome(nome.trim());
+        c.setEmail(email.trim());
         return db.inserir(c);
     }
 
     public boolean deletarCliente(int id) {
+        if (id <= 0) return false;
         return db.deletar(id);
     }
 
